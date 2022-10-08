@@ -4,10 +4,7 @@ use std::{fmt::Debug, io};
 
 use bytes::BytesMut;
 use netlink_packet_core::{
-    NetlinkBuffer,
-    NetlinkDeserializable,
-    NetlinkMessage,
-    NetlinkSerializable,
+    NetlinkBuffer, NetlinkDeserializable, NetlinkMessage, NetlinkSerializable,
 };
 pub(crate) use netlink_proto::{NetlinkCodec, NetlinkMessageCodec};
 
@@ -61,16 +58,20 @@ impl NetlinkMessageCodec for NetlinkAuditCodec {
                         //   https://github.com/linux-audit/audit-userspace/issues/78) which is not
                         //   taken into account in the buffer length.
                         //
-                        // How do we know that's the right length? Due to an implementation detail and to
+                        // How do we know that's the right length? Due to an
+                        // implementation detail and to
                         // the fact that netlink is a datagram protocol.
                         //
-                        // - our implementation of Stream always calls the codec with at most 1 message in
-                        //   the buffer, so we know the extra bytes do not belong to another message.
-                        // - because netlink is a datagram protocol, we receive entire messages, so we know
-                        //   that if those extra bytes do not belong to another message, they belong to
-                        //   this one.
+                        // - our implementation of Stream always calls the codec
+                        //   with at most 1 message in the buffer, so we know
+                        //   the extra bytes do not belong to another message.
+                        // - because netlink is a datagram protocol, we receive
+                        //   entire messages, so we know that if those extra
+                        //   bytes do not belong to another message, they belong
+                        //   to this one.
                         warn!("found what looks like a truncated audit packet");
-                        // also write correct length to buffer so parsing does not fail:
+                        // also write correct length to buffer so parsing does
+                        // not fail:
                         warn!(
                             "setting packet length to {} instead of {}",
                             src_len,
@@ -109,7 +110,8 @@ impl NetlinkMessageCodec for NetlinkAuditCodec {
                 }
                 Err(e) => {
                     error!("failed to decode packet {:#x?}: {}", &bytes, e);
-                    // continue looping, there may be more datagrams in the buffer
+                    // continue looping, there may be more datagrams in the
+                    // buffer
                 }
             }
         }

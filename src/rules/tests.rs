@@ -2,13 +2,8 @@
 
 use crate::{
     rules::{
-        RuleAction,
-        RuleBuffer,
-        RuleField,
-        RuleFieldFlags,
-        RuleFlags,
-        RuleMessage,
-        RuleSyscalls,
+        RuleAction, RuleBuffer, RuleField, RuleFieldFlags, RuleFlags,
+        RuleMessage, RuleSyscalls,
     },
     traits::{Emitable, Parseable},
 };

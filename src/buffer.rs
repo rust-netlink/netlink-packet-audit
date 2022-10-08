@@ -4,10 +4,7 @@ use crate::{
     constants::*,
     rules::{RuleBuffer, RuleMessage},
     traits::{Parseable, ParseableParametrized},
-    AuditMessage,
-    DecodeError,
-    StatusMessage,
-    StatusMessageBuffer,
+    AuditMessage, DecodeError, StatusMessage, StatusMessageBuffer,
 };
 use anyhow::Context;
 
@@ -41,8 +38,13 @@ impl<'a, T: AsRef<[u8]> + AsMut<[u8]> + ?Sized> AuditBuffer<&'a mut T> {
     }
 }
 
-impl<'a, T: AsRef<[u8]> + ?Sized> ParseableParametrized<AuditBuffer<&'a T>, u16> for AuditMessage {
-    fn parse_with_param(buf: &AuditBuffer<&'a T>, message_type: u16) -> Result<Self, DecodeError> {
+impl<'a, T: AsRef<[u8]> + ?Sized> ParseableParametrized<AuditBuffer<&'a T>, u16>
+    for AuditMessage
+{
+    fn parse_with_param(
+        buf: &AuditBuffer<&'a T>,
+        message_type: u16,
+    ) -> Result<Self, DecodeError> {
         use self::AuditMessage::*;
         let message = match message_type {
             AUDIT_GET if buf.length() == 0 => GetStatus(None),
@@ -72,14 +74,18 @@ impl<'a, T: AsRef<[u8]> + ?Sized> ParseableParametrized<AuditBuffer<&'a T>, u16>
                 let buf = RuleBuffer::new_checked(buf.inner()).context(err)?;
                 ListRules(Some(RuleMessage::parse(&buf).context(err)?))
             }
-            i if (AUDIT_EVENT_MESSAGE_MIN..AUDIT_EVENT_MESSAGE_MAX).contains(&i) => {
-                let data = String::from_utf8(buf.inner().to_vec())
-                    .context("failed to parse audit event data as a valid string")?;
+            i if (AUDIT_EVENT_MESSAGE_MIN..AUDIT_EVENT_MESSAGE_MAX)
+                .contains(&i) =>
+            {
+                let data = String::from_utf8(buf.inner().to_vec()).context(
+                    "failed to parse audit event data as a valid string",
+                )?;
                 Event((i, data))
             }
             i => {
-                let data = String::from_utf8(buf.inner().to_vec())
-                    .context("failed to parse audit event data as a valid string")?;
+                let data = String::from_utf8(buf.inner().to_vec()).context(
+                    "failed to parse audit event data as a valid string",
+                )?;
                 Other((i, data))
             }
         };
