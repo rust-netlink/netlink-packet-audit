@@ -5,13 +5,8 @@ use byteorder::{ByteOrder, NativeEndian};
 use crate::{
     constants::AUDIT_MAX_FIELDS,
     rules::{
-        RuleAction,
-        RuleBuffer,
-        RuleField,
-        RuleFieldFlags,
-        RuleFlags,
-        RuleSyscalls,
-        RULE_BUF_MIN_LEN,
+        RuleAction, RuleBuffer, RuleField, RuleFieldFlags, RuleFlags,
+        RuleSyscalls, RULE_BUF_MIN_LEN,
     },
     traits::Emitable,
 };
@@ -69,12 +64,17 @@ impl RuleMessage {
     }
 }
 
-fn set_str_field<T>(rule_buffer: &mut RuleBuffer<T>, position: usize, buflen: &mut usize, s: &str)
-where
+fn set_str_field<T>(
+    rule_buffer: &mut RuleBuffer<T>,
+    position: usize,
+    buflen: &mut usize,
+    s: &str,
+) where
     T: AsRef<[u8]> + AsMut<[u8]>,
 {
     // append the string to the strings buffer
-    rule_buffer.buf_mut()[*buflen..*buflen + s.len()].copy_from_slice(s.as_bytes());
+    rule_buffer.buf_mut()[*buflen..*buflen + s.len()]
+        .copy_from_slice(s.as_bytes());
     // set the field's value to the string length
     rule_buffer.set_value(position, s.len() as u32);
     *buflen += s.len();

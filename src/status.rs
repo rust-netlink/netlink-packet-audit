@@ -4,8 +4,7 @@ use byteorder::{ByteOrder, NativeEndian};
 
 use crate::{
     traits::{Emitable, Parseable},
-    DecodeError,
-    Field,
+    DecodeError, Field,
 };
 
 const MASK: Field = 0..4;
@@ -59,7 +58,9 @@ impl<T: AsRef<[u8]>> StatusMessageBuffer<T> {
         StatusMessageBuffer { buffer }
     }
 
-    pub fn new_checked(buffer: T) -> Result<StatusMessageBuffer<T>, DecodeError> {
+    pub fn new_checked(
+        buffer: T,
+    ) -> Result<StatusMessageBuffer<T>, DecodeError> {
         let buf = Self::new(buffer);
         buf.check_buffer_length()?;
         Ok(buf)
@@ -156,11 +157,17 @@ impl<T: AsRef<[u8]> + AsMut<[u8]>> StatusMessageBuffer<T> {
     }
 
     pub fn set_feature_bitmap(&mut self, value: u32) {
-        NativeEndian::write_u32(&mut self.buffer.as_mut()[FEATURE_BITMAP], value)
+        NativeEndian::write_u32(
+            &mut self.buffer.as_mut()[FEATURE_BITMAP],
+            value,
+        )
     }
 
     pub fn set_backlog_wait_time(&mut self, value: u32) {
-        NativeEndian::write_u32(&mut self.buffer.as_mut()[BACKLOG_WAIT_TIME], value)
+        NativeEndian::write_u32(
+            &mut self.buffer.as_mut()[BACKLOG_WAIT_TIME],
+            value,
+        )
     }
 }
 

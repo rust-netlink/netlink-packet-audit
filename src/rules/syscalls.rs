@@ -24,7 +24,8 @@ impl RuleSyscalls {
         let mut mask = RuleSyscalls::new_zeroed();
         let mut word = 0;
         while word < AUDIT_BITMASK_SIZE {
-            mask.0[word] = NativeEndian::read_u32(&slice[word * 4..word * 4 + 4]);
+            mask.0[word] =
+                NativeEndian::read_u32(&slice[word * 4..word * 4 + 4]);
             word += 1;
         }
         Ok(mask)
@@ -87,8 +88,8 @@ impl RuleSyscalls {
     }
 }
 
-// FIXME: There is a LOT of copy paste for those iterator implementations... This feels wrong but I
-// could not figure out how to avoid it :(
+// FIXME: There is a LOT of copy paste for those iterator implementations...
+// This feels wrong but I could not figure out how to avoid it :(
 
 pub struct RuleSyscallsIter<T> {
     index: u32,
@@ -114,7 +115,7 @@ impl Iterator for RuleSyscallsIter<RuleSyscalls> {
             let index = self.index;
             self.index += 1;
             if self.syscalls.has(index) {
-                return Some(index as u32);
+                return Some(index);
             }
         }
         None
@@ -140,7 +141,7 @@ impl<'a> Iterator for RuleSyscallsIter<&'a RuleSyscalls> {
             let index = self.index;
             self.index += 1;
             if self.syscalls.has(index) {
-                return Some(index as u32);
+                return Some(index);
             }
         }
         None
@@ -166,7 +167,7 @@ impl<'a> Iterator for RuleSyscallsIter<&'a mut RuleSyscalls> {
             let index = self.index;
             self.index += 1;
             if self.syscalls.has(index) {
-                return Some(index as u32);
+                return Some(index);
             }
         }
         None
@@ -193,7 +194,7 @@ mod test {
         let syscalls = RuleSyscalls::from_slice(&s[..]).unwrap();
         let mut iter = syscalls.into_iter();
         for i in 0..BITMASK_BIT_LEN {
-            assert_eq!(i as u32, iter.next().unwrap());
+            assert_eq!(i, iter.next().unwrap());
         }
         assert!(iter.next().is_none());
 

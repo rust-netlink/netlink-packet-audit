@@ -4,13 +4,8 @@ use crate::{
     constants::*,
     rules::RuleMessage,
     traits::{Emitable, ParseableParametrized},
-    AuditBuffer,
-    DecodeError,
-    NetlinkDeserializable,
-    NetlinkHeader,
-    NetlinkPayload,
-    NetlinkSerializable,
-    StatusMessage,
+    AuditBuffer, DecodeError, NetlinkDeserializable, NetlinkHeader,
+    NetlinkPayload, NetlinkSerializable, StatusMessage,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -20,17 +15,21 @@ pub enum AuditMessage {
     AddRule(RuleMessage),
     DelRule(RuleMessage),
     ListRules(Option<RuleMessage>),
-    /// Event message (message types 1300 through 1399). This includes the following message types
-    /// (this list is non-exhaustive, and not really kept up to date): `AUDIT_SYSCALL`,
-    /// `AUDIT_PATH`, `AUDIT_IPC`, `AUDIT_SOCKETCALL`, `AUDIT_CONFIG_CHANGE`, `AUDIT_SOCKADDR`,
-    /// `AUDIT_CWD`, `AUDIT_EXECVE`, `AUDIT_IPC_SET_PERM`, `AUDIT_MQ_OPEN`, `AUDIT_MQ_SENDRECV`,
-    /// `AUDIT_MQ_NOTIFY`, `AUDIT_MQ_GETSETATTR`, `AUDIT_KERNEL_OTHER`, `AUDIT_FD_PAIR`,
-    /// `AUDIT_OBJ_PID`, `AUDIT_TTY`, `AUDIT_EOE`, `AUDIT_BPRM_FCAPS`, `AUDIT_CAPSET`,
-    /// `AUDIT_MMAP`, `AUDIT_NETFILTER_PKT`, `AUDIT_NETFILTER_CFG`, `AUDIT_SECCOMP`,
-    /// `AUDIT_PROCTITLE`, `AUDIT_FEATURE_CHANGE`, `AUDIT_REPLACE`, `AUDIT_KERN_MODULE`,
-    /// `AUDIT_FANOTIFY`.
+    /// Event message (message types 1300 through 1399). This includes the
+    /// following message types (this list is non-exhaustive, and not
+    /// really kept up to date): `AUDIT_SYSCALL`, `AUDIT_PATH`,
+    /// `AUDIT_IPC`, `AUDIT_SOCKETCALL`, `AUDIT_CONFIG_CHANGE`,
+    /// `AUDIT_SOCKADDR`, `AUDIT_CWD`, `AUDIT_EXECVE`,
+    /// `AUDIT_IPC_SET_PERM`, `AUDIT_MQ_OPEN`, `AUDIT_MQ_SENDRECV`,
+    /// `AUDIT_MQ_NOTIFY`, `AUDIT_MQ_GETSETATTR`, `AUDIT_KERNEL_OTHER`,
+    /// `AUDIT_FD_PAIR`, `AUDIT_OBJ_PID`, `AUDIT_TTY`, `AUDIT_EOE`,
+    /// `AUDIT_BPRM_FCAPS`, `AUDIT_CAPSET`, `AUDIT_MMAP`,
+    /// `AUDIT_NETFILTER_PKT`, `AUDIT_NETFILTER_CFG`, `AUDIT_SECCOMP`,
+    /// `AUDIT_PROCTITLE`, `AUDIT_FEATURE_CHANGE`, `AUDIT_REPLACE`,
+    /// `AUDIT_KERN_MODULE`, `AUDIT_FANOTIFY`.
     ///
-    /// The first element of the tuple is the message type, and the second is the event data.
+    /// The first element of the tuple is the message type, and the second is
+    /// the event data.
     Event((u16, String)),
     /// All the other events are parsed as such as they can be parsed also.
     Other((u16, String)),
@@ -124,10 +123,16 @@ impl NetlinkSerializable for AuditMessage {
 
 impl NetlinkDeserializable for AuditMessage {
     type Error = DecodeError;
-    fn deserialize(header: &NetlinkHeader, payload: &[u8]) -> Result<Self, Self::Error> {
+    fn deserialize(
+        header: &NetlinkHeader,
+        payload: &[u8],
+    ) -> Result<Self, Self::Error> {
         match AuditBuffer::new_checked(payload) {
             Err(e) => Err(e),
-            Ok(buffer) => match AuditMessage::parse_with_param(&buffer, header.message_type) {
+            Ok(buffer) => match AuditMessage::parse_with_param(
+                &buffer,
+                header.message_type,
+            ) {
                 Err(e) => Err(e),
                 Ok(message) => Ok(message),
             },

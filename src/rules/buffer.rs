@@ -136,7 +136,10 @@ impl<T: AsRef<[u8]> + AsMut<[u8]>> RuleBuffer<T> {
     pub fn set_field(&mut self, position: usize, value: u32) {
         let offset = FIELDS.start + (position * 4);
         assert!(position <= FIELDS.end - 4);
-        NativeEndian::write_u32(&mut self.buffer.as_mut()[offset..offset + 4], value)
+        NativeEndian::write_u32(
+            &mut self.buffer.as_mut()[offset..offset + 4],
+            value,
+        )
     }
 
     pub fn values_mut(&mut self) -> &mut [u8] {
@@ -146,7 +149,10 @@ impl<T: AsRef<[u8]> + AsMut<[u8]>> RuleBuffer<T> {
     pub fn set_value(&mut self, position: usize, value: u32) {
         let offset = VALUES.start + (position * 4);
         assert!(position <= VALUES.end - 4);
-        NativeEndian::write_u32(&mut self.buffer.as_mut()[offset..offset + 4], value)
+        NativeEndian::write_u32(
+            &mut self.buffer.as_mut()[offset..offset + 4],
+            value,
+        )
     }
 
     pub fn field_flags_mut(&mut self) -> &mut [u8] {
@@ -156,7 +162,10 @@ impl<T: AsRef<[u8]> + AsMut<[u8]>> RuleBuffer<T> {
     pub fn set_field_flags(&mut self, position: usize, value: u32) {
         let offset = FIELD_FLAGS.start + (position * 4);
         assert!(position <= FIELD_FLAGS.end - 4);
-        NativeEndian::write_u32(&mut self.buffer.as_mut()[offset..offset + 4], value)
+        NativeEndian::write_u32(
+            &mut self.buffer.as_mut()[offset..offset + 4],
+            value,
+        )
     }
 
     pub fn buf_mut(&mut self) -> &mut [u8] {
@@ -231,7 +240,9 @@ impl<'a, T: AsRef<[u8]> + ?Sized> Parseable<RuleBuffer<&'a T>> for RuleMessage {
                         )
                         .into());
                     }
-                    let s: String = String::from_utf8_lossy(&buf.buf()[offset..str_end]).into();
+                    let s: String =
+                        String::from_utf8_lossy(&buf.buf()[offset..str_end])
+                            .into();
                     offset = str_end;
                     match field {
                         AUDIT_WATCH => Watch(s),
