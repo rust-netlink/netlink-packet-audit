@@ -6,7 +6,8 @@ extern crate log;
 pub(crate) extern crate netlink_packet_utils as utils;
 pub use self::utils::{traits, DecodeError};
 pub use netlink_packet_core::{
-    ErrorMessage, NetlinkBuffer, NetlinkHeader, NetlinkMessage, NetlinkPayload,
+    ErrorMessage, NetlinkBuffer, NetlinkEvent, NetlinkHeader, NetlinkMessage,
+    NetlinkPayload,
 };
 pub(crate) use netlink_packet_core::{
     NetlinkDeserializable, NetlinkSerializable,
