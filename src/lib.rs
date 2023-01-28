@@ -4,13 +4,11 @@
 extern crate log;
 
 pub(crate) extern crate netlink_packet_utils as utils;
-pub use self::utils::{traits, DecodeError};
-pub use netlink_packet_core::{
-    ErrorMessage, NetlinkBuffer, NetlinkHeader, NetlinkMessage, NetlinkPayload,
-};
+pub(crate) use self::utils::{traits, DecodeError};
 pub(crate) use netlink_packet_core::{
     NetlinkDeserializable, NetlinkSerializable,
 };
+pub(crate) use netlink_packet_core::{NetlinkHeader, NetlinkPayload};
 
 use core::ops::Range;
 /// Represent a multi-bytes field with a fixed size in a packet
