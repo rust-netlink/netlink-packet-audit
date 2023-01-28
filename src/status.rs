@@ -70,8 +70,8 @@ impl<T: AsRef<[u8]>> StatusMessageBuffer<T> {
         let len = self.buffer.as_ref().len();
         if len < STATUS_MESSAGE_LEN {
             return Err(format!(
-                "invalid StatusMessageBuffer buffer: length is {} instead of {}",
-                len, STATUS_MESSAGE_LEN
+                "invalid StatusMessageBuffer buffer: length is {len} \
+                instead of {STATUS_MESSAGE_LEN}"
             )
             .into());
         }

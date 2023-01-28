@@ -57,7 +57,8 @@ impl<T: AsRef<[u8]>> RuleBuffer<T> {
             .into())
         } else if len < BUFLEN.end + self.buflen() as usize {
             Err(format!(
-                "buffer length is {}, but it should be {} (header) + {} (length field)",
+                "buffer length is {}, but it should be {} (header) + {} \
+                (length field)",
                 len,
                 BUFLEN.end,
                 self.buflen()
@@ -235,8 +236,8 @@ impl<'a, T: AsRef<[u8]> + ?Sized> Parseable<RuleBuffer<&'a T>> for RuleMessage {
                     let str_end = offset + value as usize;
                     if str_end > buf.buf().len() {
                         return Err(format!(
-                            "failed to decode field. type={} (value should be a string?)",
-                            field
+                            "failed to decode field. type={field} \
+                            (value should be a string?)"
                         )
                         .into());
                     }
@@ -260,8 +261,8 @@ impl<'a, T: AsRef<[u8]> + ?Sized> Parseable<RuleBuffer<&'a T>> for RuleMessage {
                         AUDIT_OBJ_LEV_HIGH => ObjLevHigh(s),
                         _ => {
                             return Err(format!(
-                                "failed to decode field (unknown type) type={}, value={}",
-                                field, s
+                                "failed to decode field (unknown type) \
+                                type={field}, value={s}"
                             )
                             .into());
                         }
