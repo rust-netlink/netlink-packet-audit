@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: MIT
 
 use byteorder::{ByteOrder, NativeEndian};
+use netlink_packet_utils::traits::Emitable;
 
 use crate::{
-    constants::AUDIT_MAX_FIELDS,
+    constants::*,
     rules::{
         RuleAction, RuleBuffer, RuleField, RuleFieldFlags, RuleFlags,
         RuleSyscalls, RULE_BUF_MIN_LEN,
     },
-    traits::Emitable,
 };
-
-use crate::constants::*;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct RuleMessage {

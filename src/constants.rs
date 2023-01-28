@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-pub use netlink_packet_core::constants::*;
-
 // ==========================================
 // 1000 - 1099 are for commanding the audit system
 // ==========================================

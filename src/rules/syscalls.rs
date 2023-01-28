@@ -2,7 +2,9 @@
 
 use byteorder::{ByteOrder, NativeEndian};
 
-use crate::{constants::*, DecodeError};
+use netlink_packet_utils::DecodeError;
+
+use crate::constants::*;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct RuleSyscalls(pub(crate) Vec<u32>);

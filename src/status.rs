@@ -2,10 +2,12 @@
 
 use byteorder::{ByteOrder, NativeEndian};
 
-use crate::{
+use netlink_packet_utils::{
     traits::{Emitable, Parseable},
-    DecodeError, Field,
+    DecodeError,
 };
+
+use crate::Field;
 
 const MASK: Field = 0..4;
 const ENABLED: Field = 4..8;
