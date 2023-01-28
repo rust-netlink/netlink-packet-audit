@@ -3,6 +3,7 @@
 use crate::constants::*;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
+#[non_exhaustive]
 pub enum RuleField {
     Pid(u32),
     Uid(u32),
@@ -55,6 +56,7 @@ pub enum RuleField {
 }
 
 #[derive(Copy, Debug, PartialEq, Eq, Clone)]
+#[non_exhaustive]
 pub enum RuleFieldFlags {
     BitMask,
     BitTest,

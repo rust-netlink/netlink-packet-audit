@@ -3,6 +3,7 @@
 use crate::constants::*;
 
 #[derive(Copy, Debug, PartialEq, Eq, Clone)]
+#[non_exhaustive]
 pub enum RuleFlags {
     FilterUser,
     FilterTask,

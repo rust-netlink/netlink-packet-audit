@@ -12,6 +12,7 @@ use crate::{
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
+#[non_exhaustive]
 pub struct RuleMessage {
     pub flags: RuleFlags,
     pub action: RuleAction,
