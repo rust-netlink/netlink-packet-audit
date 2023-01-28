@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: MIT
 
+use anyhow::Context;
+use netlink_packet_utils::{
+    traits::{Parseable, ParseableParametrized},
+    DecodeError,
+};
+
 use crate::{
     constants::*,
     rules::{RuleBuffer, RuleMessage},
-    traits::{Parseable, ParseableParametrized},
-    AuditMessage, DecodeError, StatusMessage, StatusMessageBuffer,
+    AuditMessage, StatusMessage, StatusMessageBuffer,
 };
-use anyhow::Context;
 
 pub struct AuditBuffer<T> {
     buffer: T,

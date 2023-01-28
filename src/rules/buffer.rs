@@ -2,8 +2,9 @@
 
 use anyhow::Context;
 use byteorder::{ByteOrder, NativeEndian};
+use netlink_packet_utils::{traits::Parseable, DecodeError};
 
-use crate::{constants::*, rules::*, traits::Parseable, DecodeError, Field};
+use crate::{constants::*, rules::*, Field};
 
 // FIXME: when const fn are stable, use them, instead of defining a macro
 // const fn u32_array(start: usize, len: usize) -> Field {

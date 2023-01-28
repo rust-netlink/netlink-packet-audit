@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-use crate::{
-    constants::*,
-    rules::RuleMessage,
-    traits::{Emitable, ParseableParametrized},
-    AuditBuffer, DecodeError, NetlinkDeserializable, NetlinkHeader,
-    NetlinkPayload, NetlinkSerializable, StatusMessage,
+use netlink_packet_core::{
+    NetlinkDeserializable, NetlinkHeader, NetlinkPayload, NetlinkSerializable,
 };
+use netlink_packet_utils::{
+    traits::{Emitable, ParseableParametrized},
+    DecodeError,
+};
+
+use crate::{constants::*, rules::RuleMessage, AuditBuffer, StatusMessage};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AuditMessage {

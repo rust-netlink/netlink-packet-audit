@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-use crate::{
-    rules::{
-        RuleAction, RuleBuffer, RuleField, RuleFieldFlags, RuleFlags,
-        RuleMessage, RuleSyscalls,
-    },
-    traits::{Emitable, Parseable},
+use netlink_packet_utils::traits::{Emitable, Parseable};
+
+use crate::rules::{
+    RuleAction, RuleBuffer, RuleField, RuleFieldFlags, RuleFlags, RuleMessage,
+    RuleSyscalls,
 };
 
 const AUDIT_ARCH_X86_64: u32 = 0xC000_003E;
