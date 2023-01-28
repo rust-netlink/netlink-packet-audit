@@ -1,13 +1,13 @@
 [package]
 authors = ["Corentin Henry <corentinhenry@gmail.com>"]
 name = "netlink-packet-audit"
-version = "0.4.2"
+version = "0.5.0"
 edition = "2018"
 
 homepage = "https://github.com/rust-netlink/netlink-packet-audit"
 keywords = ["netlink", "linux"]
 license = "MIT"
-readme = "../README.md"
+readme = "README.md"
 repository = "https://github.com/rust-netlink/netlink-packet-audit"
 description = "netlink packet types"
 
