@@ -11,6 +11,7 @@ use netlink_packet_utils::{
 use crate::{constants::*, rules::RuleMessage, AuditBuffer, StatusMessage};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
+#[non_exhaustive]
 pub enum AuditMessage {
     GetStatus(Option<StatusMessage>),
     SetStatus(StatusMessage),

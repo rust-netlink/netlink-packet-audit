@@ -20,6 +20,7 @@ pub(crate) use netlink_proto::{NetlinkCodec, NetlinkMessageCodec};
 /// - https://github.com/torvalds/linux/blob/b5013d084e03e82ceeab4db8ae8ceeaebe76b0eb/kernel/audit.c#L2386
 /// - https://github.com/mozilla/libaudit-go/issues/24
 /// - https://github.com/linux-audit/audit-userspace/issues/78
+#[non_exhaustive]
 pub struct NetlinkAuditCodec {
     // we don't need an instance of this, just the type
     _private: (),

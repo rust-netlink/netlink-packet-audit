@@ -7,6 +7,7 @@ use netlink_packet_utils::DecodeError;
 use crate::constants::*;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
+#[non_exhaustive]
 pub struct RuleSyscalls(pub(crate) Vec<u32>);
 
 const BITMASK_BYTE_LEN: usize = AUDIT_BITMASK_SIZE * 4;
@@ -93,6 +94,7 @@ impl RuleSyscalls {
 // FIXME: There is a LOT of copy paste for those iterator implementations...
 // This feels wrong but I could not figure out how to avoid it :(
 
+#[non_exhaustive]
 pub struct RuleSyscallsIter<T> {
     index: u32,
     syscalls: T,

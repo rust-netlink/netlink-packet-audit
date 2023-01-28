@@ -33,6 +33,7 @@ fn BUF(len: usize) -> Field {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
+#[non_exhaustive]
 pub struct RuleBuffer<T> {
     buffer: T,
 }

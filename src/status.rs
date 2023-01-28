@@ -22,6 +22,7 @@ const BACKLOG_WAIT_TIME: Field = 36..40;
 pub const STATUS_MESSAGE_LEN: usize = BACKLOG_WAIT_TIME.end;
 
 #[derive(Debug, PartialEq, Eq, Clone, Default)]
+#[non_exhaustive]
 pub struct StatusMessage {
     /// Bit mask for valid entries
     pub mask: u32,
@@ -51,6 +52,7 @@ impl StatusMessage {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
+#[non_exhaustive]
 pub struct StatusMessageBuffer<T> {
     buffer: T,
 }

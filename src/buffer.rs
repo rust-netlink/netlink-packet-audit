@@ -12,6 +12,7 @@ use crate::{
     AuditMessage, StatusMessage, StatusMessageBuffer,
 };
 
+#[non_exhaustive]
 pub struct AuditBuffer<T> {
     buffer: T,
 }
