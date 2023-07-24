@@ -45,7 +45,9 @@ impl NetlinkMessageCodec for NetlinkAuditCodec {
             let src_len = src.len();
             let len = match NetlinkBuffer::new_checked(src.as_mut()) {
                 Ok(mut buf) => {
-                    if (src_len as isize - buf.length() as isize) <= 16 {
+                    if src_len != buf.length() as usize
+                        && (src_len as isize - buf.length() as isize) <= 16
+                    {
                         // The audit messages are sometimes truncated,
                         // because the length specified in the header,
                         // does not take the header itself into
@@ -70,11 +72,9 @@ impl NetlinkMessageCodec for NetlinkAuditCodec {
                         //   entire messages, so we know that if those extra
                         //   bytes do not belong to another message, they belong
                         //   to this one.
-                        warn!("found what looks like a truncated audit packet");
-                        // also write correct length to buffer so parsing does
-                        // not fail:
-                        warn!(
-                            "setting packet length to {} instead of {}",
+                        trace!(
+                            "found what looks like a truncated audit packet, \
+                             setting packet length to {} instead of {}",
                             src_len,
                             buf.length()
                         );
