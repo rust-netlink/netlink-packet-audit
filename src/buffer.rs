@@ -79,6 +79,7 @@ impl<'a, T: AsRef<[u8]> + ?Sized> ParseableParametrized<AuditBuffer<&'a T>, u16>
                 let buf = RuleBuffer::new_checked(buf.inner()).context(err)?;
                 ListRules(Some(RuleMessage::parse(&buf).context(err)?))
             }
+            AUDIT_REPLACE => Replace(buf.inner().to_vec()),
             i if (AUDIT_EVENT_MESSAGE_MIN..AUDIT_EVENT_MESSAGE_MAX)
                 .contains(&i) =>
             {
