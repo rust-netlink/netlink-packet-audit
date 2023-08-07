@@ -18,6 +18,11 @@ pub enum AuditMessage {
     AddRule(RuleMessage),
     DelRule(RuleMessage),
     ListRules(Option<RuleMessage>),
+    /// AUDIT_REPLACE message.
+    ///
+    /// This one is parsed distinctly as its payload, a uint32 number,
+    /// is not utf-8, and thus cannot be converted to a String.
+    Replace(Vec<u8>),
     /// Event message (message types 1300 through 1399). This includes the
     /// following message types (this list is non-exhaustive, and not
     /// really kept up to date): `AUDIT_SYSCALL`, `AUDIT_PATH`,
@@ -63,6 +68,10 @@ impl AuditMessage {
         matches!(self, AuditMessage::ListRules(_))
     }
 
+    pub fn is_replace(&self) -> bool {
+        matches!(self, AuditMessage::Replace(_))
+    }
+
     pub fn message_type(&self) -> u16 {
         use self::AuditMessage::*;
 
@@ -72,6 +81,7 @@ impl AuditMessage {
             ListRules(_) => AUDIT_LIST_RULES,
             AddRule(_) => AUDIT_ADD_RULE,
             DelRule(_) => AUDIT_DEL_RULE,
+            Replace(_) => AUDIT_REPLACE,
             Event((message_type, _)) => *message_type,
             Other((message_type, _)) => *message_type,
         }
@@ -89,6 +99,7 @@ impl Emitable for AuditMessage {
             DelRule(ref msg) => msg.buffer_len(),
             ListRules(Some(ref msg)) => msg.buffer_len(),
             GetStatus(None) | ListRules(None) => 0,
+            Replace(ref data) => data.len(),
             Event((_, ref data)) => data.len(),
             Other((_, ref data)) => data.len(),
         }
@@ -104,6 +115,7 @@ impl Emitable for AuditMessage {
             DelRule(ref msg) => msg.emit(buffer),
             ListRules(Some(ref msg)) => msg.emit(buffer),
             ListRules(None) | GetStatus(None) => {}
+            Replace(ref data) => buffer.copy_from_slice(data),
             Event((_, ref data)) => buffer.copy_from_slice(data.as_bytes()),
             Other((_, ref data)) => buffer.copy_from_slice(data.as_bytes()),
         }
