@@ -138,7 +138,7 @@ impl<'a> IntoIterator for &'a RuleSyscalls {
     }
 }
 
-impl<'a> Iterator for RuleSyscallsIter<&'a RuleSyscalls> {
+impl Iterator for RuleSyscallsIter<&RuleSyscalls> {
     type Item = u32;
     fn next(&mut self) -> Option<Self::Item> {
         while self.index < BITMASK_BIT_LEN {
@@ -164,7 +164,7 @@ impl<'a> IntoIterator for &'a mut RuleSyscalls {
     }
 }
 
-impl<'a> Iterator for RuleSyscallsIter<&'a mut RuleSyscalls> {
+impl Iterator for RuleSyscallsIter<&mut RuleSyscalls> {
     type Item = u32;
     fn next(&mut self) -> Option<Self::Item> {
         while self.index < BITMASK_BIT_LEN {

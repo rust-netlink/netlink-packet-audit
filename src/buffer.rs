@@ -37,7 +37,7 @@ impl<'a, T: AsRef<[u8]> + ?Sized> AuditBuffer<&'a T> {
     }
 }
 
-impl<'a, T: AsRef<[u8]> + AsMut<[u8]> + ?Sized> AuditBuffer<&'a mut T> {
+impl<T: AsRef<[u8]> + AsMut<[u8]> + ?Sized> AuditBuffer<&mut T> {
     pub fn inner_mut(&mut self) -> &mut [u8] {
         self.buffer.as_mut()
     }
