@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-use byteorder::{ByteOrder, NativeEndian};
-
-use netlink_packet_utils::DecodeError;
+use netlink_packet_core::{parse_u32, DecodeError};
 
 use crate::constants::*;
 
@@ -27,8 +25,7 @@ impl RuleSyscalls {
         let mut mask = RuleSyscalls::new_zeroed();
         let mut word = 0;
         while word < AUDIT_BITMASK_SIZE {
-            mask.0[word] =
-                NativeEndian::read_u32(&slice[word * 4..word * 4 + 4]);
+            mask.0[word] = parse_u32(&slice[word * 4..word * 4 + 4]).unwrap();
             word += 1;
         }
         Ok(mask)

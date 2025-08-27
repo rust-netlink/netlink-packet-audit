@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-use anyhow::Context;
-use byteorder::{ByteOrder, NativeEndian};
-use netlink_packet_utils::{traits::Parseable, DecodeError};
+use netlink_packet_core::{
+    emit_u32, parse_u32, DecodeError, ErrorContext, Parseable,
+};
 
 use crate::{constants::*, rules::*, Field};
 
@@ -72,19 +72,19 @@ impl<T: AsRef<[u8]>> RuleBuffer<T> {
     }
 
     pub fn flags(&self) -> u32 {
-        NativeEndian::read_u32(&self.buffer.as_ref()[FLAGS])
+        parse_u32(&self.buffer.as_ref()[FLAGS]).unwrap()
     }
 
     pub fn action(&self) -> u32 {
-        NativeEndian::read_u32(&self.buffer.as_ref()[ACTION])
+        parse_u32(&self.buffer.as_ref()[ACTION]).unwrap()
     }
 
     pub fn field_count(&self) -> u32 {
-        NativeEndian::read_u32(&self.buffer.as_ref()[FIELD_COUNT])
+        parse_u32(&self.buffer.as_ref()[FIELD_COUNT]).unwrap()
     }
 
     pub fn buflen(&self) -> u32 {
-        NativeEndian::read_u32(&self.buffer.as_ref()[BUFLEN])
+        parse_u32(&self.buffer.as_ref()[BUFLEN]).unwrap()
     }
 }
 
@@ -113,19 +113,19 @@ impl<'a, T: AsRef<[u8]> + ?Sized> RuleBuffer<&'a T> {
 
 impl<T: AsRef<[u8]> + AsMut<[u8]>> RuleBuffer<T> {
     pub fn set_flags(&mut self, value: u32) {
-        NativeEndian::write_u32(&mut self.buffer.as_mut()[FLAGS], value)
+        emit_u32(&mut self.buffer.as_mut()[FLAGS], value).unwrap()
     }
 
     pub fn set_action(&mut self, value: u32) {
-        NativeEndian::write_u32(&mut self.buffer.as_mut()[ACTION], value)
+        emit_u32(&mut self.buffer.as_mut()[ACTION], value).unwrap()
     }
 
     pub fn set_field_count(&mut self, value: u32) {
-        NativeEndian::write_u32(&mut self.buffer.as_mut()[FIELD_COUNT], value)
+        emit_u32(&mut self.buffer.as_mut()[FIELD_COUNT], value).unwrap()
     }
 
     pub fn set_buflen(&mut self, value: u32) {
-        NativeEndian::write_u32(&mut self.buffer.as_mut()[BUFLEN], value)
+        emit_u32(&mut self.buffer.as_mut()[BUFLEN], value).unwrap()
     }
 
     pub fn syscalls_mut(&mut self) -> &mut [u8] {
@@ -139,10 +139,7 @@ impl<T: AsRef<[u8]> + AsMut<[u8]>> RuleBuffer<T> {
     pub fn set_field(&mut self, position: usize, value: u32) {
         let offset = FIELDS.start + (position * 4);
         assert!(position <= FIELDS.end - 4);
-        NativeEndian::write_u32(
-            &mut self.buffer.as_mut()[offset..offset + 4],
-            value,
-        )
+        emit_u32(&mut self.buffer.as_mut()[offset..offset + 4], value).unwrap()
     }
 
     pub fn values_mut(&mut self) -> &mut [u8] {
@@ -152,10 +149,7 @@ impl<T: AsRef<[u8]> + AsMut<[u8]>> RuleBuffer<T> {
     pub fn set_value(&mut self, position: usize, value: u32) {
         let offset = VALUES.start + (position * 4);
         assert!(position <= VALUES.end - 4);
-        NativeEndian::write_u32(
-            &mut self.buffer.as_mut()[offset..offset + 4],
-            value,
-        )
+        emit_u32(&mut self.buffer.as_mut()[offset..offset + 4], value).unwrap()
     }
 
     pub fn field_flags_mut(&mut self) -> &mut [u8] {
@@ -165,10 +159,7 @@ impl<T: AsRef<[u8]> + AsMut<[u8]>> RuleBuffer<T> {
     pub fn set_field_flags(&mut self, position: usize, value: u32) {
         let offset = FIELD_FLAGS.start + (position * 4);
         assert!(position <= FIELD_FLAGS.end - 4);
-        NativeEndian::write_u32(
-            &mut self.buffer.as_mut()[offset..offset + 4],
-            value,
-        )
+        emit_u32(&mut self.buffer.as_mut()[offset..offset + 4], value).unwrap()
     }
 
     pub fn buf_mut(&mut self) -> &mut [u8] {
@@ -189,12 +180,12 @@ impl<'a, T: AsRef<[u8]> + ?Sized> Parseable<RuleBuffer<&'a T>> for RuleMessage {
 
         let mut offset = 0;
 
-        let fields = buf.fields().chunks(4).map(NativeEndian::read_u32);
-        let values = buf.values().chunks(4).map(NativeEndian::read_u32);
+        let fields = buf.fields().chunks(4).map(|b| parse_u32(b).unwrap());
+        let values = buf.values().chunks(4).map(|b| parse_u32(b).unwrap());
         let field_flags = buf
             .field_flags()
             .chunks(4)
-            .map(|chunk| RuleFieldFlags::from(NativeEndian::read_u32(chunk)));
+            .map(|chunk| RuleFieldFlags::from(parse_u32(chunk).unwrap()));
         for (field, value, flags) in fields
             .zip(values.zip(field_flags))
             .map(|(field, (value, flags))| (field, value, flags))
