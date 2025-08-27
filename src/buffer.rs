@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-use anyhow::Context;
-use netlink_packet_utils::{
-    traits::{Parseable, ParseableParametrized},
-    DecodeError,
+use netlink_packet_core::{
+    parse_string, DecodeError, ErrorContext, Parseable, ParseableParametrized,
 };
 
 use crate::{
@@ -82,13 +80,13 @@ impl<'a, T: AsRef<[u8]> + ?Sized> ParseableParametrized<AuditBuffer<&'a T>, u16>
             i if (AUDIT_EVENT_MESSAGE_MIN..AUDIT_EVENT_MESSAGE_MAX)
                 .contains(&i) =>
             {
-                let data = String::from_utf8(buf.inner().to_vec()).context(
+                let data = parse_string(buf.inner()).context(
                     "failed to parse audit event data as a valid string",
                 )?;
                 Event((i, data))
             }
             i => {
-                let data = String::from_utf8(buf.inner().to_vec()).context(
+                let data = parse_string(buf.inner()).context(
                     "failed to parse audit event data as a valid string",
                 )?;
                 Other((i, data))

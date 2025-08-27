@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT
 
 use netlink_packet_core::{
-    NetlinkDeserializable, NetlinkHeader, NetlinkPayload, NetlinkSerializable,
-};
-use netlink_packet_utils::{
-    traits::{Emitable, ParseableParametrized},
-    DecodeError,
+    DecodeError, Emitable, NetlinkDeserializable, NetlinkHeader,
+    NetlinkPayload, NetlinkSerializable, ParseableParametrized,
 };
 
 use crate::{constants::*, rules::RuleMessage, AuditBuffer, StatusMessage};

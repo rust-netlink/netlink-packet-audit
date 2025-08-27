@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-use byteorder::{ByteOrder, NativeEndian};
-use netlink_packet_utils::traits::Emitable;
+use netlink_packet_core::{emit_u32, Emitable};
 
 use crate::{
     constants::*,
@@ -94,7 +93,7 @@ impl Emitable for RuleMessage {
         {
             let syscalls = rule_buffer.syscalls_mut();
             for (i, word) in self.syscalls.0.iter().enumerate() {
-                NativeEndian::write_u32(&mut syscalls[i * 4..i * 4 + 4], *word);
+                emit_u32(&mut syscalls[i * 4..i * 4 + 4], *word).unwrap();
             }
         }
         rule_buffer.set_buflen(self.compute_string_values_length() as u32);
