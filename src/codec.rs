@@ -110,7 +110,7 @@ impl NetlinkMessageCodec for NetlinkAuditCodec {
                     return Ok(Some(packet));
                 }
                 Err(e) => {
-                    error!("failed to decode packet {:#x?}: {}", &bytes, e);
+                    error!("failed to decode packet {:#x?}: {}", bytes, e);
                     // continue looping, there may be more datagrams in the
                     // buffer
                 }
