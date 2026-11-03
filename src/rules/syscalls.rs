@@ -47,12 +47,10 @@ impl RuleSyscalls {
 
     /// Return `true` if all the syscalls are set, `false` otherwise
     pub fn is_all(&self) -> bool {
-        for i in 0..AUDIT_BITMASK_SIZE {
-            if self.0[i] != 0xffff_ffff {
-                return false;
-            }
-        }
-        true
+        self.0
+            .iter()
+            .take(AUDIT_BITMASK_SIZE)
+            .all(|&w| w == 0xffff_ffff)
     }
 
     /// Set all the bits
