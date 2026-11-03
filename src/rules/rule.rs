@@ -37,6 +37,7 @@ impl RuleMessage {
     fn compute_string_values_length(&self) -> usize {
         self.fields
             .iter()
+            .take(MAX_FIELDS)
             .map(|(field, _)| field.string().map_or(0, str::len))
             .sum()
     }
@@ -55,8 +56,11 @@ impl Emitable for RuleMessage {
         let mut values = [0u32; MAX_FIELDS];
         let mut field_flags = [0u32; MAX_FIELDS];
 
+        let field_count = self.fields.len().min(MAX_FIELDS);
         let mut string_offset = 0;
-        for (index, (field, flags)) in self.fields.iter().enumerate() {
+        for (index, (field, flags)) in
+            self.fields.iter().take(field_count).enumerate()
+        {
             fields[index] = field.kind();
             field_flags[index] = (*flags).into();
             if let Some(string) = field.string() {
@@ -73,7 +77,7 @@ impl Emitable for RuleMessage {
         let raw = RuleMessageBuffer {
             flags: self.flags.into(),
             action: self.action.into(),
-            field_count: self.fields.len() as u32,
+            field_count: field_count as u32,
             syscalls,
             fields,
             values,

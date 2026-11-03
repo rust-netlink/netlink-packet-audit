@@ -3,7 +3,8 @@
 use netlink_packet_core::{Emitable, Parseable};
 
 use crate::rules::{
-    RuleAction, RuleField, RuleFieldFlags, RuleFlags, RuleMessage, RuleSyscalls,
+    field::MAX_FIELDS, RuleAction, RuleField, RuleFieldFlags, RuleFlags,
+    RuleMessage, RuleSyscalls,
 };
 
 const AUDIT_ARCH_X86_64: u32 = 0xC000_003E;
@@ -355,6 +356,29 @@ const M3_BYTES: [u8; 1046] = [
     0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x62, 0x79, 0x70, 0x61,
     0x73, 0x73,
 ];
+
+#[test]
+fn emit_truncates_too_many_fields() {
+    let mut rule = RuleMessage::new();
+    rule.flags = RuleFlags::FilterExit;
+    rule.action = RuleAction::Always;
+    for _ in 0..MAX_FIELDS {
+        rule.fields.push((RuleField::Pid(1), RuleFieldFlags::Equal));
+    }
+    rule.fields.push((
+        RuleField::Filterkey("ignored".into()),
+        RuleFieldFlags::Equal,
+    ));
+
+    assert_eq!(rule.buffer_len(), RuleMessage::new().buffer_len());
+
+    let mut buf = vec![0; rule.buffer_len()];
+    rule.emit(&mut buf);
+
+    let parsed = RuleMessage::parse(&buf).unwrap();
+    assert_eq!(parsed.fields.len(), MAX_FIELDS);
+    assert_eq!(parsed.fields.as_slice(), &rule.fields[..MAX_FIELDS]);
+}
 
 #[test]
 fn rule_field_flags_round_trip() {
