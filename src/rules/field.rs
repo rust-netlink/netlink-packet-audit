@@ -44,6 +44,7 @@ const AUDIT_OBJ_UID: u32 = 109;
 const AUDIT_OBJ_GID: u32 = 110;
 const AUDIT_FIELD_COMPARE: u32 = 111;
 const AUDIT_EXE: u32 = 112;
+const AUDIT_SADDR_FAM: u32 = 113;
 const AUDIT_ARG0: u32 = 200;
 const AUDIT_ARG1: u32 = 201;
 const AUDIT_ARG2: u32 = 202;
@@ -90,6 +91,7 @@ pub enum RuleField {
     ObjGid(u32),
     FieldCompare(u32),
     Exe(String),
+    SaddrFam(u32),
     Arg0(u32),
     Arg1(u32),
     Arg2(u32),
@@ -144,6 +146,7 @@ impl RuleField {
             ObjGid(_) => AUDIT_OBJ_GID,
             FieldCompare(_) => AUDIT_FIELD_COMPARE,
             Exe(_) => AUDIT_EXE,
+            SaddrFam(_) => AUDIT_SADDR_FAM,
             Arg0(_) => AUDIT_ARG0,
             Arg1(_) => AUDIT_ARG1,
             Arg2(_) => AUDIT_ARG2,
@@ -174,8 +177,8 @@ impl RuleField {
             | Sessionid(value) | Fstype(value) | Devmajor(value)
             | Devminor(value) | Inode(value) | Exit(value) | Success(value)
             | Perm(value) | Filetype(value) | ObjUid(value) | ObjGid(value)
-            | FieldCompare(value) | Arg0(value) | Arg1(value) | Arg2(value)
-            | Arg3(value) => *value,
+            | FieldCompare(value) | SaddrFam(value) | Arg0(value)
+            | Arg1(value) | Arg2(value) | Arg3(value) => *value,
             Watch(_) | Dir(_) | Filterkey(_) | SubjUser(_) | SubjRole(_)
             | SubjType(_) | SubjSen(_) | SubjClr(_) | ObjUser(_)
             | ObjRole(_) | ObjType(_) | ObjLevLow(_) | ObjLevHigh(_)
@@ -250,6 +253,7 @@ impl RuleField {
             AUDIT_OBJ_GID => ObjGid(value),
             AUDIT_FIELD_COMPARE => FieldCompare(value),
             AUDIT_EXE => Exe(string),
+            AUDIT_SADDR_FAM => SaddrFam(value),
             AUDIT_ARG0 => Arg0(value),
             AUDIT_ARG1 => Arg1(value),
             AUDIT_ARG2 => Arg2(value),
