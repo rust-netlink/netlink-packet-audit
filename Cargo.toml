@@ -16,9 +16,7 @@ bytes = "1.0"
 log = "0.4.8"
 netlink-packet-core = "0.9.0"
 netlink-proto = { default-features = false, version = "0.14.1" }
-
-[dev-dependencies]
-lazy_static = "1.4.0"
+zerocopy = { version = "0.8", features = ["derive"] }
 
 [patch.crates-io]
 netlink-packet-audit = { path = "." }

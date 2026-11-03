@@ -1,6 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-use crate::constants::*;
+const AUDIT_FILTER_USER: u32 = 0;
+const AUDIT_FILTER_TASK: u32 = 1;
+const AUDIT_FILTER_ENTRY: u32 = 2;
+const AUDIT_FILTER_WATCH: u32 = 3;
+const AUDIT_FILTER_EXIT: u32 = 4;
+const AUDIT_FILTER_TYPE: u32 = 5;
+const AUDIT_FILTER_FS: u32 = 6;
+const AUDIT_NR_FILTERS: u32 = 7;
+const AUDIT_FILTER_PREPEND: u32 = 16;
+const AUDIT_FILTER_UNSET: u32 = 128;
 
 #[derive(Copy, Debug, PartialEq, Eq, Clone)]
 #[non_exhaustive]

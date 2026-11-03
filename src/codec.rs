@@ -3,6 +3,7 @@
 use std::{fmt::Debug, io};
 
 use bytes::BytesMut;
+use log::{debug, error, trace, warn};
 use netlink_packet_core::{
     NetlinkBuffer, NetlinkDeserializable, NetlinkMessage, NetlinkSerializable,
 };

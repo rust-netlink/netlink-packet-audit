@@ -1,11 +1,21 @@
 // SPDX-License-Identifier: MIT
 
 use netlink_packet_core::{
-    DecodeError, Emitable, NetlinkDeserializable, NetlinkHeader,
-    NetlinkPayload, NetlinkSerializable, ParseableParametrized,
+    parse_string, DecodeError, Emitable, ErrorContext, NetlinkDeserializable,
+    NetlinkHeader, NetlinkPayload, NetlinkSerializable, Parseable,
+    ParseableParametrized,
 };
 
-use crate::{constants::*, rules::RuleMessage, AuditBuffer, StatusMessage};
+use crate::{rules::RuleMessage, StatusMessage};
+
+const AUDIT_GET: u16 = 1000;
+const AUDIT_SET: u16 = 1001;
+const AUDIT_ADD_RULE: u16 = 1011;
+const AUDIT_DEL_RULE: u16 = 1012;
+const AUDIT_LIST_RULES: u16 = 1013;
+
+const AUDIT_EVENT_MESSAGE_MIN: u16 = 1300;
+const AUDIT_EVENT_MESSAGE_MAX: u16 = 1399;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 #[non_exhaustive]
@@ -45,7 +55,7 @@ impl AuditMessage {
     }
 
     pub fn is_set_status(&self) -> bool {
-        matches!(self, AuditMessage::GetStatus(_))
+        matches!(self, AuditMessage::SetStatus(_))
     }
 
     pub fn is_add_rule(&self) -> bool {
@@ -107,6 +117,55 @@ impl Emitable for AuditMessage {
     }
 }
 
+impl ParseableParametrized<[u8], u16> for AuditMessage {
+    fn parse_with_param(
+        buf: &[u8],
+        message_type: u16,
+    ) -> Result<Self, DecodeError> {
+        use self::AuditMessage::*;
+
+        let message = match message_type {
+            AUDIT_GET if buf.is_empty() => GetStatus(None),
+            AUDIT_GET => GetStatus(Some(
+                StatusMessage::parse(buf)
+                    .context("failed to parse AUDIT_GET message")?,
+            )),
+            AUDIT_SET => SetStatus(
+                StatusMessage::parse(buf)
+                    .context("failed to parse AUDIT_SET message")?,
+            ),
+            AUDIT_ADD_RULE => AddRule(
+                RuleMessage::parse(buf)
+                    .context("failed to parse AUDIT_ADD_RULE message")?,
+            ),
+            AUDIT_DEL_RULE => DelRule(
+                RuleMessage::parse(buf)
+                    .context("failed to parse AUDIT_DEL_RULE message")?,
+            ),
+            AUDIT_LIST_RULES if buf.is_empty() => ListRules(None),
+            AUDIT_LIST_RULES => ListRules(Some(
+                RuleMessage::parse(buf)
+                    .context("failed to parse AUDIT_LIST_RULES message")?,
+            )),
+            i if (AUDIT_EVENT_MESSAGE_MIN..=AUDIT_EVENT_MESSAGE_MAX)
+                .contains(&i) =>
+            {
+                let data = parse_string(buf).context(
+                    "failed to parse audit event data as a valid string",
+                )?;
+                Event((i, data))
+            }
+            i => {
+                let data = parse_string(buf).context(
+                    "failed to parse audit event data as a valid string",
+                )?;
+                Other((i, data))
+            }
+        };
+        Ok(message)
+    }
+}
+
 impl NetlinkSerializable for AuditMessage {
     fn message_type(&self) -> u16 {
         self.message_type()
@@ -127,16 +186,7 @@ impl NetlinkDeserializable for AuditMessage {
         header: &NetlinkHeader,
         payload: &[u8],
     ) -> Result<Self, Self::Error> {
-        match AuditBuffer::new_checked(payload) {
-            Err(e) => Err(e),
-            Ok(buffer) => match AuditMessage::parse_with_param(
-                &buffer,
-                header.message_type,
-            ) {
-                Err(e) => Err(e),
-                Ok(message) => Ok(message),
-            },
-        }
+        AuditMessage::parse_with_param(payload, header.message_type)
     }
 }
 
