@@ -16,6 +16,7 @@ const AUDIT_FILTER_PREPEND: u32 = 16;
 const AUDIT_FILTER_UNSET: u32 = 128;
 
 #[derive(Copy, Debug, PartialEq, Eq, Clone, Hash, Default)]
+#[non_exhaustive]
 pub struct RuleFlags(u32);
 
 #[allow(non_upper_case_globals)]

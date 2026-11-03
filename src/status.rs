@@ -65,6 +65,7 @@ const STATUS_MESSAGE_LEN: usize = 44;
     Immutable,
     Unaligned,
 )]
+#[non_exhaustive]
 #[repr(C, packed)]
 pub struct StatusMessageBuffer {
     mask: u32,
