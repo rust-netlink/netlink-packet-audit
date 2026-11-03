@@ -1,22 +1,18 @@
 // SPDX-License-Identifier: MIT
 
 mod action;
-pub use self::action::*;
-
-mod field;
-pub use self::field::*;
-
-mod flags;
-pub use self::flags::*;
-
-mod syscalls;
-pub use self::syscalls::*;
-
 mod buffer;
-pub use self::buffer::*;
-
+mod field;
+mod flags;
 mod rule;
-pub use self::rule::*;
+mod syscalls;
 
 #[cfg(test)]
 mod tests;
+
+pub use self::action::RuleAction;
+pub use self::buffer::RuleMessageBuffer;
+pub use self::field::{RuleField, RuleFieldFlags};
+pub use self::flags::RuleFlags;
+pub use self::rule::RuleMessage;
+pub use self::syscalls::{RuleSyscalls, RuleSyscallsIter};

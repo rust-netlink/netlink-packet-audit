@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-use crate::constants::*;
+const AUDIT_NEVER: u32 = 0;
+const AUDIT_POSSIBLE: u32 = 1;
+const AUDIT_ALWAYS: u32 = 2;
 
 #[derive(Copy, Debug, PartialEq, Eq, Clone)]
 #[non_exhaustive]

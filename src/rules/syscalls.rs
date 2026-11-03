@@ -2,14 +2,13 @@
 
 use netlink_packet_core::{parse_u32, DecodeError};
 
-use crate::constants::*;
-
 #[derive(Debug, PartialEq, Eq, Clone)]
 #[non_exhaustive]
 pub struct RuleSyscalls(pub(crate) Vec<u32>);
 
-const BITMASK_BYTE_LEN: usize = AUDIT_BITMASK_SIZE * 4;
-const BITMASK_BIT_LEN: u32 = AUDIT_BITMASK_SIZE as u32 * 32;
+pub(crate) const BITMASK_SIZE: usize = 64;
+const BITMASK_BYTE_LEN: usize = BITMASK_SIZE * 4;
+const BITMASK_BIT_LEN: u32 = BITMASK_SIZE as u32 * 32;
 
 // FIXME: I'm not 100% sure this implementation is correct wrt to endianness.
 impl RuleSyscalls {
@@ -24,7 +23,7 @@ impl RuleSyscalls {
         }
         let mut mask = RuleSyscalls::new_zeroed();
         let mut word = 0;
-        while word < AUDIT_BITMASK_SIZE {
+        while word < BITMASK_SIZE {
             mask.0[word] = parse_u32(&slice[word * 4..word * 4 + 4]).unwrap();
             word += 1;
         }
@@ -32,30 +31,27 @@ impl RuleSyscalls {
     }
 
     pub fn new_zeroed() -> Self {
-        RuleSyscalls(vec![0; AUDIT_BITMASK_SIZE])
+        RuleSyscalls(vec![0; BITMASK_SIZE])
     }
 
     pub fn new_maxed() -> Self {
-        RuleSyscalls(vec![0xffff_ffff; AUDIT_BITMASK_SIZE])
+        RuleSyscalls(vec![0xffff_ffff; BITMASK_SIZE])
     }
 
     /// Unset all the bits
     pub fn unset_all(&mut self) -> &mut Self {
-        self.0 = vec![0; AUDIT_BITMASK_SIZE];
+        self.0 = vec![0; BITMASK_SIZE];
         self
     }
 
     /// Return `true` if all the syscalls are set, `false` otherwise
     pub fn is_all(&self) -> bool {
-        self.0
-            .iter()
-            .take(AUDIT_BITMASK_SIZE)
-            .all(|&w| w == 0xffff_ffff)
+        self.0.iter().take(BITMASK_SIZE).all(|&w| w == 0xffff_ffff)
     }
 
     /// Set all the bits
     pub fn set_all(&mut self) -> &mut Self {
-        self.0 = vec![0xffff_ffff; AUDIT_BITMASK_SIZE];
+        self.0 = vec![0xffff_ffff; BITMASK_SIZE];
         self
     }
 
@@ -180,11 +176,11 @@ mod test {
     fn test_from_slice() {
         let s: Vec<u8> = vec![0xff; BITMASK_BYTE_LEN];
         let syscalls = RuleSyscalls::from_slice(&s[..]).unwrap();
-        assert_eq!(syscalls.0, vec![0xffff_ffff; AUDIT_BITMASK_SIZE]);
+        assert_eq!(syscalls.0, vec![0xffff_ffff; BITMASK_SIZE]);
 
         let s: Vec<u8> = vec![0; BITMASK_BYTE_LEN];
         let syscalls = RuleSyscalls::from_slice(&s[..]).unwrap();
-        assert_eq!(syscalls.0, vec![0; AUDIT_BITMASK_SIZE]);
+        assert_eq!(syscalls.0, vec![0; BITMASK_SIZE]);
     }
 
     #[test]
@@ -204,15 +200,34 @@ mod test {
     }
 
     #[test]
+    fn test_all_and_has() {
+        let mut syscalls = RuleSyscalls::new_zeroed();
+        assert!(!syscalls.is_all());
+        assert!(!syscalls.has(0));
+        syscalls.set(0);
+        assert!(syscalls.has(0));
+
+        syscalls.set_all();
+        assert!(syscalls.is_all());
+        assert!(syscalls.has(BITMASK_BIT_LEN - 1));
+
+        syscalls.unset_all();
+        assert!(!syscalls.is_all());
+        assert!(!syscalls.has(0));
+
+        assert!(RuleSyscalls::new_maxed().is_all());
+    }
+
+    #[test]
     fn test_set_unset() {
         let mut syscalls = RuleSyscalls::new_zeroed();
         for i in 0..BITMASK_BIT_LEN {
             syscalls.set(i);
         }
-        assert_eq!(syscalls.0, vec![0xffff_ffff; AUDIT_BITMASK_SIZE]);
+        assert_eq!(syscalls.0, vec![0xffff_ffff; BITMASK_SIZE]);
         for i in 0..BITMASK_BIT_LEN {
             syscalls.unset(BITMASK_BIT_LEN - 1 - i);
         }
-        assert_eq!(syscalls.0, vec![0; AUDIT_BITMASK_SIZE]);
+        assert_eq!(syscalls.0, vec![0; BITMASK_SIZE]);
     }
 }
