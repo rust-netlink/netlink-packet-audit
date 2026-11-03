@@ -57,28 +57,35 @@ impl RuleSyscalls {
 
     /// Unset the bit corresponding to the given syscall
     pub fn unset(&mut self, syscall: u32) -> &mut Self {
-        let (word, mask) = Self::syscall_coordinates(syscall);
-        self.0[word] &= !mask;
+        if let Some((word, mask)) = Self::syscall_coordinates(syscall) {
+            self.0[word] &= !mask;
+        }
         self
     }
 
     /// Set the bit corresponding to the given syscall
     pub fn set(&mut self, syscall: u32) -> &mut Self {
-        let (word, mask) = Self::syscall_coordinates(syscall);
-        self.0[word] |= mask;
+        if let Some((word, mask)) = Self::syscall_coordinates(syscall) {
+            self.0[word] |= mask;
+        }
         self
     }
 
     /// Check if the bit corresponding to the given syscall is set
     pub fn has(&self, syscall: u32) -> bool {
-        let (word, mask) = Self::syscall_coordinates(syscall);
-        self.0[word] & mask == mask
+        match Self::syscall_coordinates(syscall) {
+            Some((word, mask)) => self.0[word] & mask == mask,
+            None => false,
+        }
     }
 
-    fn syscall_coordinates(syscall: u32) -> (usize, u32) {
+    fn syscall_coordinates(syscall: u32) -> Option<(usize, u32)> {
         let word_index = syscall / 32;
+        if word_index as usize >= BITMASK_SIZE {
+            return None;
+        }
         let mask = 0x0000_0001 << (syscall - word_index * 32);
-        (word_index as usize, mask)
+        Some((word_index as usize, mask))
     }
 }
 
@@ -216,6 +223,23 @@ mod test {
         assert!(!syscalls.has(0));
 
         assert!(RuleSyscalls::new_maxed().is_all());
+    }
+
+    #[test]
+    fn test_out_of_range_is_ignored() {
+        let mut syscalls = RuleSyscalls::new_zeroed();
+
+        syscalls.set(BITMASK_BIT_LEN);
+        syscalls.unset(BITMASK_BIT_LEN);
+        syscalls.set(u32::MAX);
+        syscalls.unset(u32::MAX);
+
+        assert_eq!(syscalls.0, vec![0; BITMASK_SIZE]);
+        assert!(!syscalls.has(BITMASK_BIT_LEN));
+        assert!(!syscalls.has(u32::MAX));
+
+        syscalls.set(BITMASK_BIT_LEN - 1);
+        assert!(syscalls.has(BITMASK_BIT_LEN - 1));
     }
 
     #[test]
