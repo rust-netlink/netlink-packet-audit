@@ -1,4 +1,15 @@
 # Changelog
+## [0.7.1] - 2026-11-03
+### Breaking changes
+ - N/A
+
+### New features
+ - N/A
+
+### Bug fixes
+ - Use netlink-proto 0.14.1. (8a712f1)
+ - LICENSE: fix LICENSE-MIT. (46dff59)
+
 ## [0.7.0] - 2026-08-18
 ### Breaking changes
  - New netlink-packet-core 0.9.0 and netlink-proto 0.13.0. (62a8130)
