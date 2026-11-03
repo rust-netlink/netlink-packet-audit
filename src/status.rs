@@ -1,10 +1,34 @@
 // SPDX-License-Identifier: MIT
 
+use bitflags::bitflags;
 use netlink_packet_core::{
     emit_u32, parse_u32, DecodeError, Emitable, Parseable,
 };
 
 use crate::Field;
+
+const AUDIT_STATUS_ENABLED: u32 = 1;
+const AUDIT_STATUS_FAILURE: u32 = 2;
+const AUDIT_STATUS_PID: u32 = 4;
+const AUDIT_STATUS_RATE_LIMIT: u32 = 8;
+const AUDIT_STATUS_BACKLOG_LIMIT: u32 = 16;
+const AUDIT_STATUS_BACKLOG_WAIT_TIME: u32 = 32;
+const AUDIT_STATUS_LOST: u32 = 64;
+
+bitflags! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+    #[non_exhaustive]
+    pub struct AuditStatus: u32 {
+        const Enabled = AUDIT_STATUS_ENABLED;
+        const Failure = AUDIT_STATUS_FAILURE;
+        const Pid = AUDIT_STATUS_PID;
+        const RateLimit = AUDIT_STATUS_RATE_LIMIT;
+        const BacklogLimit = AUDIT_STATUS_BACKLOG_LIMIT;
+        const BacklogWaitTime = AUDIT_STATUS_BACKLOG_WAIT_TIME;
+        const Lost = AUDIT_STATUS_LOST;
+        const _ = !0;
+    }
+}
 
 const MASK: Field = 0..4;
 const ENABLED: Field = 4..8;
@@ -22,7 +46,7 @@ pub const STATUS_MESSAGE_LEN: usize = BACKLOG_WAIT_TIME.end;
 #[non_exhaustive]
 pub struct StatusMessage {
     /// Bit mask for valid entries
-    pub mask: u32,
+    pub mask: AuditStatus,
     pub enabled: u32,
     /// Failure-to-log action
     pub failure: u32,
@@ -170,7 +194,7 @@ impl<T: AsRef<[u8]>> Parseable<StatusMessageBuffer<T>> for StatusMessage {
     fn parse(buf: &StatusMessageBuffer<T>) -> Result<Self, DecodeError> {
         buf.check_buffer_length()?;
         Ok(StatusMessage {
-            mask: buf.mask(),
+            mask: AuditStatus::from_bits_retain(buf.mask()),
             enabled: buf.enabled(),
             failure: buf.failure(),
             pid: buf.pid(),
@@ -191,7 +215,7 @@ impl Emitable for StatusMessage {
 
     fn emit(&self, buffer: &mut [u8]) {
         let mut buffer = StatusMessageBuffer::new(buffer);
-        buffer.set_mask(self.mask);
+        buffer.set_mask(self.mask.bits());
         buffer.set_enabled(self.enabled);
         buffer.set_failure(self.failure);
         buffer.set_pid(self.pid);
@@ -201,5 +225,27 @@ impl Emitable for StatusMessage {
         buffer.set_backlog(self.backlog);
         buffer.set_feature_bitmap(self.feature_bitmap);
         buffer.set_backlog_wait_time(self.backlog_wait_time);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn audit_status_mask_round_trip() {
+        let mut status = StatusMessage::new();
+        status.mask = AuditStatus::Enabled | AuditStatus::Pid;
+
+        let mut buffer = vec![0; status.buffer_len()];
+        status.emit(&mut buffer);
+
+        let buffer = StatusMessageBuffer::new_checked(&buffer[..]).unwrap();
+        let parsed = StatusMessage::parse(&buffer).unwrap();
+
+        assert_eq!(parsed.mask, AuditStatus::Enabled | AuditStatus::Pid);
+        assert!(parsed.mask.contains(AuditStatus::Enabled));
+        assert!(parsed.mask.contains(AuditStatus::Pid));
+        assert!(!parsed.mask.contains(AuditStatus::Lost));
     }
 }
