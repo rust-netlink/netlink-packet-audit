@@ -21,6 +21,7 @@ use crate::rules::{
     Immutable,
     Unaligned,
 )]
+#[non_exhaustive]
 #[repr(C, packed)]
 pub struct RuleMessageBuffer {
     pub(crate) flags: u32,
