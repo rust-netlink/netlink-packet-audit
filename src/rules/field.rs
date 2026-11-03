@@ -112,6 +112,8 @@ pub enum RuleField {
     ObjType(String),
     ObjLevLow(String),
     ObjLevHigh(String),
+
+    Unknown(u32, u32),
 }
 
 impl RuleField {
@@ -164,6 +166,7 @@ impl RuleField {
             ObjType(_) => AUDIT_OBJ_TYPE,
             ObjLevLow(_) => AUDIT_OBJ_LEV_LOW,
             ObjLevHigh(_) => AUDIT_OBJ_LEV_HIGH,
+            Unknown(kind, _) => *kind,
         }
     }
 
@@ -183,6 +186,7 @@ impl RuleField {
             | SubjType(_) | SubjSen(_) | SubjClr(_) | ObjUser(_)
             | ObjRole(_) | ObjType(_) | ObjLevLow(_) | ObjLevHigh(_)
             | Exe(_) => 0,
+            Unknown(_, value) => *value,
         }
     }
 
@@ -271,13 +275,7 @@ impl RuleField {
             AUDIT_OBJ_TYPE => ObjType(string),
             AUDIT_OBJ_LEV_LOW => ObjLevLow(string),
             AUDIT_OBJ_LEV_HIGH => ObjLevHigh(string),
-            _ => {
-                return Err(format!(
-                    "failed to decode field (unknown type) type={kind}, \
-                    value={string}"
-                )
-                .into());
-            }
+            _ => Unknown(kind, value),
         })
     }
 }

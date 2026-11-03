@@ -358,6 +358,30 @@ const M3_BYTES: [u8; 1046] = [
 ];
 
 #[test]
+fn unknown_rule_field_round_trip() {
+    let mut rule = RuleMessage::new();
+    rule.flags = RuleFlags::FilterExit;
+    rule.action = RuleAction::Always;
+    rule.fields = vec![
+        (RuleField::Pid(1), RuleFieldFlags::Equal),
+        (RuleField::Unknown(250, 1234), RuleFieldFlags::Equal),
+        (RuleField::Filterkey("after".into()), RuleFieldFlags::Equal),
+    ];
+    rule.syscalls.set(42);
+
+    assert_eq!(RuleField::Unknown(250, 1234).kind(), 250);
+    assert_eq!(RuleField::Unknown(250, 1234).value(), 1234);
+    assert_eq!(
+        RuleField::from_kind(250, 1234, String::new()).unwrap(),
+        RuleField::Unknown(250, 1234)
+    );
+
+    let mut buf = vec![0; rule.buffer_len()];
+    rule.emit(&mut buf);
+    assert_eq!(RuleMessage::parse(&buf).unwrap(), rule);
+}
+
+#[test]
 fn emit_truncates_too_many_fields() {
     let mut rule = RuleMessage::new();
     rule.flags = RuleFlags::FilterExit;
