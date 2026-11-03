@@ -54,6 +54,32 @@ fn emit_rule_3() {
     assert_eq!(&buf[..], &M3_BYTES[..]);
 }
 
+#[test]
+fn saddr_fam_rule_round_trip() {
+    let mut rule = RuleMessage::new();
+    rule.flags = RuleFlags::FilterExit;
+    rule.action = RuleAction::Always;
+    rule.fields = vec![
+        (RuleField::Arch(AUDIT_ARCH_X86_64), RuleFieldFlags::Equal),
+        (RuleField::SaddrFam(2), RuleFieldFlags::Equal),
+        (
+            RuleField::Filterkey("npa_saddr_tmp".into()),
+            RuleFieldFlags::Equal,
+        ),
+    ];
+    rule.syscalls.set(42);
+
+    assert_eq!(RuleField::SaddrFam(2).kind(), 113);
+    assert_eq!(
+        RuleField::from_kind(113, 2, String::new()).unwrap(),
+        RuleField::SaddrFam(2)
+    );
+
+    let mut buf = vec![0; rule.buffer_len()];
+    rule.emit(&mut buf);
+    assert_eq!(RuleMessage::parse(&buf).unwrap(), rule);
+}
+
 const M1_BYTES: [u8; 1051] = [
     // len = 1051
     0x04, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
