@@ -384,12 +384,14 @@ fn rule_flags_and_actions_round_trip() {
         (RuleFlags::FilterEntry, 2),
         (RuleFlags::FilterWatch, 3),
         (RuleFlags::FilterExit, 4),
+        (RuleFlags::FilterExclude, 5),
         (RuleFlags::FilterType, 5),
         (RuleFlags::FilterFs, 6),
-        (RuleFlags::NrFilters, 7),
+        (RuleFlags::FilterUringExit, 7),
+        (RuleFlags::NrFilters, 8),
         (RuleFlags::FilterPrepend, 16),
         (RuleFlags::Unset, 128),
-        (RuleFlags::Unknown(99), 99),
+        (RuleFlags::from(99), 99),
     ];
     for (flag, raw) in flags {
         assert_eq!(u32::from(flag), raw);
@@ -406,6 +408,22 @@ fn rule_flags_and_actions_round_trip() {
         assert_eq!(u32::from(action), raw);
         assert_eq!(RuleAction::from(raw), action);
     }
+}
+
+#[test]
+fn rule_flags_prepend_is_composable() {
+    let flags = RuleFlags::FilterExit | RuleFlags::FilterPrepend;
+
+    assert_eq!(u32::from(flags), 0x14);
+    assert_eq!(RuleFlags::from(0x14), flags);
+    assert!(flags.is_prepend());
+    assert_eq!(flags.without_prepend(), RuleFlags::FilterExit);
+
+    let mut flags = RuleFlags::FilterUringExit;
+    flags |= RuleFlags::FilterPrepend;
+    assert_eq!(u32::from(flags), 0x17);
+    assert!(flags.is_prepend());
+    assert_eq!(flags.without_prepend(), RuleFlags::FilterUringExit);
 }
 
 #[test]
