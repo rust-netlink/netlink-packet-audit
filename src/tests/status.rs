@@ -26,12 +26,12 @@ fn test_get_status_reply() {
     );
 
     assert_eq!(
-        NetlinkMessage::<AuditMessage>::deserialize(&GET_REPLY_BYTES).unwrap(),
+        NetlinkMessage::<AuditMessage>::deserialize(GET_REPLY_BYTES).unwrap(),
         expected
     );
 
-    let mut buffer = vec![0; expected.buffer_len()];
-    expected.emit(&mut buffer);
+    let mut buffer = Vec::new();
+    expected.emit(&mut buffer).unwrap();
     assert_eq!(buffer.as_slice(), &GET_REPLY_BYTES[..]);
 }
 
@@ -47,13 +47,12 @@ fn test_set_status_request() {
     );
 
     assert_eq!(
-        NetlinkMessage::<AuditMessage>::deserialize(&SET_REQUEST_BYTES)
-            .unwrap(),
+        NetlinkMessage::<AuditMessage>::deserialize(SET_REQUEST_BYTES).unwrap(),
         expected
     );
 
-    let mut buffer = vec![0; expected.buffer_len()];
-    expected.emit(&mut buffer);
+    let mut buffer = Vec::new();
+    expected.emit(&mut buffer).unwrap();
     assert_eq!(buffer.as_slice(), &SET_REQUEST_BYTES[..]);
 }
 
@@ -65,13 +64,12 @@ fn test_get_status_request() {
     );
 
     assert_eq!(
-        NetlinkMessage::<AuditMessage>::deserialize(&GET_REQUEST_BYTES)
-            .unwrap(),
+        NetlinkMessage::<AuditMessage>::deserialize(GET_REQUEST_BYTES).unwrap(),
         expected
     );
 
-    let mut buffer = vec![0; expected.buffer_len()];
-    expected.emit(&mut buffer);
+    let mut buffer = Vec::new();
+    expected.emit(&mut buffer).unwrap();
     assert_eq!(buffer.as_slice(), &GET_REQUEST_BYTES[..]);
 }
 

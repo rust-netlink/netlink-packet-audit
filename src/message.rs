@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 use netlink_packet_core::{
-    parse_string, DecodeError, Emitable, ErrorContext, NetlinkDeserializable,
-    NetlinkHeader, NetlinkPayload, NetlinkSerializable, Parseable,
-    ParseableParametrized,
+    parse_string, DecodeError, Emitable, EncodeError, ErrorContext,
+    NetlinkDeserializable, NetlinkHeader, NetlinkMessagePayload,
+    NetlinkPayload, Parseable, ParseableParametrized,
 };
 
 use crate::{rules::RuleMessage, StatusMessage};
@@ -86,33 +86,20 @@ impl AuditMessage {
 }
 
 impl Emitable for AuditMessage {
-    fn buffer_len(&self) -> usize {
+    fn emit_value(&self, out: &mut Vec<u8>) -> Result<(), EncodeError> {
         use self::AuditMessage::*;
 
         match self {
-            GetStatus(Some(ref msg)) => msg.buffer_len(),
-            SetStatus(ref msg) => msg.buffer_len(),
-            AddRule(ref msg) => msg.buffer_len(),
-            DelRule(ref msg) => msg.buffer_len(),
-            ListRules(Some(ref msg)) => msg.buffer_len(),
-            GetStatus(None) | ListRules(None) => 0,
-            Event((_, ref data)) => data.len(),
-            Other((_, ref data)) => data.len(),
-        }
-    }
-
-    fn emit(&self, buffer: &mut [u8]) {
-        use self::AuditMessage::*;
-
-        match self {
-            GetStatus(Some(ref msg)) => msg.emit(buffer),
-            SetStatus(ref msg) => msg.emit(buffer),
-            AddRule(ref msg) => msg.emit(buffer),
-            DelRule(ref msg) => msg.emit(buffer),
-            ListRules(Some(ref msg)) => msg.emit(buffer),
-            ListRules(None) | GetStatus(None) => {}
-            Event((_, ref data)) => buffer.copy_from_slice(data.as_bytes()),
-            Other((_, ref data)) => buffer.copy_from_slice(data.as_bytes()),
+            GetStatus(Some(ref msg)) => msg.emit(out),
+            SetStatus(ref msg) => msg.emit(out),
+            AddRule(ref msg) => msg.emit(out),
+            DelRule(ref msg) => msg.emit(out),
+            ListRules(Some(ref msg)) => msg.emit(out),
+            ListRules(None) | GetStatus(None) => Ok(()),
+            Event((_, ref data)) | Other((_, ref data)) => {
+                out.extend_from_slice(data.as_bytes());
+                Ok(())
+            }
         }
     }
 }
@@ -166,26 +153,17 @@ impl ParseableParametrized<[u8], u16> for AuditMessage {
     }
 }
 
-impl NetlinkSerializable for AuditMessage {
+impl NetlinkMessagePayload for AuditMessage {
     fn message_type(&self) -> u16 {
         self.message_type()
-    }
-
-    fn buffer_len(&self) -> usize {
-        <Self as Emitable>::buffer_len(self)
-    }
-
-    fn serialize(&self, buffer: &mut [u8]) {
-        self.emit(buffer)
     }
 }
 
 impl NetlinkDeserializable for AuditMessage {
-    type Error = DecodeError;
     fn deserialize(
         header: &NetlinkHeader,
         payload: &[u8],
-    ) -> Result<Self, Self::Error> {
+    ) -> Result<Self, DecodeError> {
         AuditMessage::parse_with_param(payload, header.message_type)
     }
 }

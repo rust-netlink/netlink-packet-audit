@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 use bitflags::bitflags;
-use netlink_packet_core::{DecodeError, Emitable, Parseable};
+use netlink_packet_core::{DecodeError, Emitable, EncodeError, Parseable};
 use zerocopy::{FromBytes, Immutable, IntoBytes, KnownLayout, Unaligned};
 
 const AUDIT_STATUS_ENABLED: u32 = 1;
@@ -160,13 +160,10 @@ impl Parseable<[u8]> for StatusMessage {
 }
 
 impl Emitable for StatusMessage {
-    fn buffer_len(&self) -> usize {
-        STATUS_MESSAGE_LEN
-    }
-
-    fn emit(&self, buffer: &mut [u8]) {
+    fn emit_value(&self, out: &mut Vec<u8>) -> Result<(), EncodeError> {
         let raw = StatusMessageBuffer::from(self);
-        buffer[..STATUS_MESSAGE_LEN].copy_from_slice(raw.as_bytes());
+        out.extend_from_slice(raw.as_bytes());
+        Ok(())
     }
 }
 
@@ -203,9 +200,9 @@ mod tests {
         assert_eq!(parsed.backlog_wait_time, 60000);
         assert_eq!(parsed.backlog_wait_time_actual, 0);
 
-        let mut buffer = vec![0; parsed.buffer_len()];
-        parsed.emit(&mut buffer);
-        assert_eq!(buffer, GET_REPLY_PAYLOAD);
+        let mut buffer = Vec::new();
+        parsed.emit(&mut buffer).unwrap();
+        assert_eq!(buffer.as_slice(), &GET_REPLY_PAYLOAD);
     }
 
     #[test]
