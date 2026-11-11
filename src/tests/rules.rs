@@ -14,21 +14,20 @@ fn test_list_rules_reply() {
     );
 
     assert_eq!(
-        NetlinkMessage::<AuditMessage>::deserialize(&LIST_RULES_REPLY_BYTES)
+        NetlinkMessage::<AuditMessage>::deserialize(LIST_RULES_REPLY_BYTES)
             .unwrap(),
         expected
     );
 
-    let mut buffer = vec![0; expected.buffer_len()];
-    expected.emit(&mut buffer);
+    let mut buffer = Vec::new();
+    expected.emit(&mut buffer).unwrap();
     assert_eq!(buffer.as_slice(), &LIST_RULES_REPLY_BYTES[..]);
 }
 
 #[test]
 fn test_add_rule_request() {
     let parsed =
-        NetlinkMessage::<AuditMessage>::deserialize(&ADD_REQUEST_BYTES)
-            .unwrap();
+        NetlinkMessage::<AuditMessage>::deserialize(ADD_REQUEST_BYTES).unwrap();
     assert_eq!(
         parsed.payload,
         NetlinkPayload::from(AuditMessage::AddRule(rule_m3()))
@@ -38,8 +37,7 @@ fn test_add_rule_request() {
 #[test]
 fn test_del_rule_request() {
     let parsed =
-        NetlinkMessage::<AuditMessage>::deserialize(&DEL_REQUEST_BYTES)
-            .unwrap();
+        NetlinkMessage::<AuditMessage>::deserialize(DEL_REQUEST_BYTES).unwrap();
     assert_eq!(
         parsed.payload,
         NetlinkPayload::from(AuditMessage::DelRule(rule_m3()))
@@ -54,13 +52,13 @@ fn test_list_rules_request() {
     );
 
     assert_eq!(
-        NetlinkMessage::<AuditMessage>::deserialize(&LIST_REQUEST_BYTES)
+        NetlinkMessage::<AuditMessage>::deserialize(LIST_REQUEST_BYTES)
             .unwrap(),
         expected
     );
 
-    let mut buffer = vec![0; expected.buffer_len()];
-    expected.emit(&mut buffer);
+    let mut buffer = Vec::new();
+    expected.emit(&mut buffer).unwrap();
     assert_eq!(buffer.as_slice(), &LIST_REQUEST_BYTES[..]);
 }
 

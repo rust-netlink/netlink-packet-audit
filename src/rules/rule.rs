@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-use netlink_packet_core::Emitable;
+use netlink_packet_core::{Emitable, EncodeError};
 use zerocopy::IntoBytes;
 
 use crate::rules::{
-    buffer::RULE_BUF_MIN_LEN, field::MAX_FIELDS, syscalls::BITMASK_SIZE,
-    RuleAction, RuleField, RuleFieldFlags, RuleFlags, RuleMessageBuffer,
-    RuleSyscalls,
+    field::MAX_FIELDS, syscalls::BITMASK_SIZE, RuleAction, RuleField,
+    RuleFieldFlags, RuleFlags, RuleMessageBuffer, RuleSyscalls,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -33,31 +32,19 @@ impl RuleMessage {
             syscalls: RuleSyscalls::new_zeroed(),
         }
     }
-
-    fn compute_string_values_length(&self) -> usize {
-        self.fields
-            .iter()
-            .take(MAX_FIELDS)
-            .map(|(field, _)| field.string().map_or(0, str::len))
-            .sum()
-    }
 }
 
 impl Emitable for RuleMessage {
-    fn buffer_len(&self) -> usize {
-        RULE_BUF_MIN_LEN + self.compute_string_values_length()
-    }
-
-    fn emit(&self, buffer: &mut [u8]) {
+    fn emit_value(&self, out: &mut Vec<u8>) -> Result<(), EncodeError> {
         let mut syscalls = [0u32; BITMASK_SIZE];
         syscalls.copy_from_slice(&self.syscalls.0);
 
         let mut fields = [0u32; MAX_FIELDS];
         let mut values = [0u32; MAX_FIELDS];
         let mut field_flags = [0u32; MAX_FIELDS];
+        let mut strings = Vec::new();
 
         let field_count = self.fields.len().min(MAX_FIELDS);
-        let mut string_offset = 0;
         for (index, (field, flags)) in
             self.fields.iter().take(field_count).enumerate()
         {
@@ -65,10 +52,7 @@ impl Emitable for RuleMessage {
             field_flags[index] = (*flags).into();
             if let Some(string) = field.string() {
                 values[index] = string.len() as u32;
-                let start = RULE_BUF_MIN_LEN + string_offset;
-                let end = start + string.len();
-                buffer[start..end].copy_from_slice(string.as_bytes());
-                string_offset += string.len();
+                strings.extend_from_slice(string.as_bytes());
             } else {
                 values[index] = field.value();
             }
@@ -82,8 +66,10 @@ impl Emitable for RuleMessage {
             fields,
             values,
             field_flags,
-            buflen: string_offset as u32,
+            buflen: strings.len() as u32,
         };
-        buffer[..RULE_BUF_MIN_LEN].copy_from_slice(raw.as_bytes());
+        out.extend_from_slice(raw.as_bytes());
+        out.extend_from_slice(&strings);
+        Ok(())
     }
 }

@@ -12,10 +12,7 @@ description = "netlink packet types"
 
 [dependencies]
 bitflags = "2"
-bytes = "1.0"
-log = "0.4.8"
-netlink-packet-core = "0.9.0"
-netlink-proto = { default-features = false, version = "0.14.1" }
+netlink-packet-core = "1.0.0-rc1"
 zerocopy = { version = "0.8", features = ["derive"] }
 
 [patch.crates-io]

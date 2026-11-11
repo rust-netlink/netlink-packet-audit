@@ -17,13 +17,13 @@ fn test_event_syscall() {
     );
 
     assert_eq!(
-        NetlinkMessage::<AuditMessage>::deserialize(&EVENT_SYSCALL_BYTES)
+        NetlinkMessage::<AuditMessage>::deserialize(EVENT_SYSCALL_BYTES)
             .unwrap(),
         expected
     );
 
-    let mut buffer = vec![0; expected.buffer_len()];
-    expected.emit(&mut buffer);
+    let mut buffer = Vec::new();
+    expected.emit(&mut buffer).unwrap();
     assert_eq!(buffer.as_slice(), &EVENT_SYSCALL_BYTES[..]);
 }
 
@@ -38,12 +38,12 @@ fn test_event_path() {
     );
 
     assert_eq!(
-        NetlinkMessage::<AuditMessage>::deserialize(&EVENT_PATH_BYTES).unwrap(),
+        NetlinkMessage::<AuditMessage>::deserialize(EVENT_PATH_BYTES).unwrap(),
         expected
     );
 
-    let mut buffer = vec![0; expected.buffer_len()];
-    expected.emit(&mut buffer);
+    let mut buffer = Vec::new();
+    expected.emit(&mut buffer).unwrap();
     assert_eq!(buffer.as_slice(), &EVENT_PATH_BYTES[..]);
 }
 
@@ -58,13 +58,12 @@ fn test_event_other() {
     );
 
     assert_eq!(
-        NetlinkMessage::<AuditMessage>::deserialize(&EVENT_OTHER_BYTES)
-            .unwrap(),
+        NetlinkMessage::<AuditMessage>::deserialize(EVENT_OTHER_BYTES).unwrap(),
         expected
     );
 
-    let mut buffer = vec![0; expected.buffer_len()];
-    expected.emit(&mut buffer);
+    let mut buffer = Vec::new();
+    expected.emit(&mut buffer).unwrap();
     assert_eq!(buffer.as_slice(), &EVENT_OTHER_BYTES[..]);
 }
 

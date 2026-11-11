@@ -21,9 +21,8 @@ fn parse_rule_1() {
 
 #[test]
 fn emit_rule_1() {
-    assert_eq!(m1().buffer_len(), M1_BYTES.len());
-    let mut buf = vec![0; M1_BYTES.len()];
-    m1().emit(&mut buf);
+    let mut buf = Vec::new();
+    m1().emit(&mut buf).unwrap();
     assert_eq!(&buf[..], &M1_BYTES[..]);
 }
 
@@ -35,9 +34,8 @@ fn parse_rule_2() {
 
 #[test]
 fn emit_rule_2() {
-    assert_eq!(m2().buffer_len(), M2_BYTES.len());
-    let mut buf = vec![0; M2_BYTES.len()];
-    m2().emit(&mut buf);
+    let mut buf = Vec::new();
+    m2().emit(&mut buf).unwrap();
     assert_eq!(&buf[..], &M2_BYTES[..]);
 }
 
@@ -49,9 +47,8 @@ fn parse_rule_3() {
 
 #[test]
 fn emit_rule_3() {
-    assert_eq!(m3().buffer_len(), M3_BYTES.len());
-    let mut buf = vec![0; M3_BYTES.len()];
-    m3().emit(&mut buf);
+    let mut buf = Vec::new();
+    m3().emit(&mut buf).unwrap();
     assert_eq!(&buf[..], &M3_BYTES[..]);
 }
 
@@ -76,8 +73,8 @@ fn saddr_fam_rule_round_trip() {
         RuleField::SaddrFam(2)
     );
 
-    let mut buf = vec![0; rule.buffer_len()];
-    rule.emit(&mut buf);
+    let mut buf = Vec::new();
+    rule.emit(&mut buf).unwrap();
     assert_eq!(RuleMessage::parse(&buf).unwrap(), rule);
 }
 
@@ -376,8 +373,8 @@ fn unknown_rule_field_round_trip() {
         RuleField::Unknown(250, 1234)
     );
 
-    let mut buf = vec![0; rule.buffer_len()];
-    rule.emit(&mut buf);
+    let mut buf = Vec::new();
+    rule.emit(&mut buf).unwrap();
     assert_eq!(RuleMessage::parse(&buf).unwrap(), rule);
 }
 
@@ -394,10 +391,12 @@ fn emit_truncates_too_many_fields() {
         RuleFieldFlags::Equal,
     ));
 
-    assert_eq!(rule.buffer_len(), RuleMessage::new().buffer_len());
+    let mut buf = Vec::new();
+    rule.emit(&mut buf).unwrap();
 
-    let mut buf = vec![0; rule.buffer_len()];
-    rule.emit(&mut buf);
+    let mut empty_buf = Vec::new();
+    RuleMessage::new().emit(&mut empty_buf).unwrap();
+    assert_eq!(buf.len(), empty_buf.len());
 
     let parsed = RuleMessage::parse(&buf).unwrap();
     assert_eq!(parsed.fields.len(), MAX_FIELDS);
@@ -485,8 +484,8 @@ fn round_trip_captured_rules() {
     for (raw, expected) in cases {
         let parsed = RuleMessage::parse(raw).unwrap();
         assert_eq!(parsed, expected);
-        let mut buf = vec![0; parsed.buffer_len()];
-        parsed.emit(&mut buf);
+        let mut buf = Vec::new();
+        parsed.emit(&mut buf).unwrap();
         assert_eq!(buf.as_slice(), raw);
     }
 }
